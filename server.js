@@ -100,8 +100,23 @@ const RootQueryType = new GraphQLObjectType({
     })
 })
 
+// mutation to be able to modify the objects
+
+const RootMutationType = new GraphQLObjectType({
+    name: "Mutation",
+    description: "Change objects",
+    fields: () => ({
+        changeStatusColumn: {
+            type: ColumnType,
+            description: "modify Column Status",
+            args
+        }
+    })
+})
+
 const schema = new GraphQLSchema({
-    query: RootQueryType
+    query: RootQueryType,
+    mutation: RootMutationType
 })
 
 app.use('/graphql', graphqlHTTP({
