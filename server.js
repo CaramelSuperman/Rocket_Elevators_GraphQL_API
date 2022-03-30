@@ -1,14 +1,4 @@
 var mysql = require('mysql')
-// const Pool = require("pg").Pool;
-// const pool = new Pool({
-//     user: "root",
-//     host: "root",
-//     database: "Rocket_Elevator_Information_System_development",
-//     password: "Rolens123@",
-//     port: "5432"
-//   });
-// const schema = "myschema";
-// var pgSchemas = [];
 
 var con = mysql.createConnection({
     host: "localhost",
@@ -17,160 +7,191 @@ var con = mysql.createConnection({
     database: "Rocket_Elevator_Information_System_development"
 });
 
+const express = require('express')
+const app = express()
+const { graphqlHTTP } = require("express-graphql");
+
+
 con.connect(function(err) {
     if (err) throw err;
-    con.query("Show tables", function (err, result, fields) {
-      if (err) throw err;
-    //   console.log(result);
-    console.log("we are connected to mysql")
-    });
     con.query("Select * from customers", function (err, result, fields) {
       if (err) throw err;
-    //   console.log(result);
+      //console.log(result);
     //   console.log("Addresses table")
     });
   });   
 
+// Sequelize ->
 
-const express = require('express')
-const app = express()
-const { graphqlHTTP } = require("express-graphql");
-const {
-    GraphQLSchema,
-    GraphQLObjectType,
-    GraphQLString,
-    GraphQLList,
-    GraphQLInt,
-    GraphQLNonNull
-} = require('graphql')
+import Sequelize from 'sequelize';
 
-// OBJECTS
-const AddressType = new GraphQLObjectType({
-    name: "Address",
-    description: "Address of the buidling",
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        type_of_address: { type: GraphQLNonNull(GraphQLString) },
-        status: { type: GraphQLString},
-        entity: { type: GraphQLString},
-        numer_and_street: { type: GraphQLNonNull(GraphQLString) },
-        suite_and_appartment: { type: GraphQLString},
-        city: { type: GraphQLNonNull(GraphQLString) },
-        postal_code: { type: GraphQLString },
-        country: {type: GraphQLNonNull(GraphQLString) },
-        notes: { type: GraphQLString },
-        interventions: { type: GraphQLList(InterventionType) }
-    })
-})
-const CustomerType = new GraphQLObjectType({
-    name: "Customer",
-    description: "Get customers infos",
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        address: { type: [AddressType] },
-        company_name: { type: GraphQLNonNull(GraphQLString) },
-        email_company: { type: GraphQLNonNull(GraphQLString) },
-        company_description: { type: GraphQLString},
-        full_name_service_technical_authority: { type: GraphQLNonNull(GraphQLString) },
-        technical_authority_phone: { type: GraphQLNonNull(GraphQLInt) },
-        technical_authority_email: { type: GraphQLNonNull(GraphQLString) },
-        interventions: { type: GraphQLList(InterventionType) }
-        
-    })
-})
+var db = {}
 
-const InterventionType = new GraphQLObjectType({
-    name: "Intervention",
-    description: "Interventions date",
-    fields: () => ({
-        id: { type: GraphQLNonNull(GraphQLInt) },
-        date_start: { type: GraphQLNonNull(GraphQLString) },
-        date_end: { type: GraphQLNonNull(GraphQLString) },
-        notes: { type: GraphQLString }
-    })
-})
-
-
-//PRINTING OBJECTS
-
-const RootQueryType = new GraphQLObjectType({
-    name: "Query",
-    description: "Root Query",
-    // function so we can define everything before we run it
-    fields: () => ({
-        address: {
-            type: AddressType,
-            description: "Specific address",
-            args: {
-                id: { type: GraphQLInt },
-                city: { type: GraphQLString }
-            },
-            resolve: (parent, args) => address.find(address => address.id === args.id)
+const sequelize = new Sequelize(
+    'Rocket_Elevator_Information_System_development',
+    'root',
+    'Rolens123@',
+    {
+        host: 'localhost',
+        port: '3000',
+        dialect: 'mysql',
+        define: {
+            freezeTableName: true,
         },
-        addresses: {
-            type: new GraphQLList(AddressType),
-            description: "All available batteries",
-            resolve: () =>  {
-                var addresses = con.query("Select * from addresses", function (err, result, fields) {
-                    if (err) throw err;
-                    // console.log(result);
-                    // console.log("Get all addresses")
-                    return result
-                  });
-                  return 1
-                
-            }
+        pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000,
         },
-        interventions: {
-            type: InterventionType,
-            description: "get intervetnions",
-            args: {
-                id: { type: GraphQLInt },
-            },
-            resolve: (parent, args) => interventions.find(intervention => intervention.id === args.id)
-        },
-        interventions: {
-            type: InterventionType,
-            description: "get intervetnions",
-            args: {
-                id: { type: GraphQLInt },
-            },
-            resolve: (parent, args) => interventions.find(intervention => intervention.id === args.id)
-        },
-    })
-})
+        // <http://docs.sequelizejs.com/manual/tutorial/querying.html#operators>
+        operatorsAliases: false,
+    },
+)
 
-// mutation to be able to modify the objects
 
-const RootMutationType = new GraphQLObjectType({
-    name: "Mutations",
-    description: "Change objects",
-    fields: () => ({
-        changeStatusAddress: {
-            type: AddressType,
-            description: "modify Column Status",
+const graphql = require('graphql');
+
+class Address {
+    constructor( id, type_of_address, numer_and_street, city, postal_code, country, interventions) {
+      this.type_of_address = type_of_address;
+      this.id = id
+      this.numer_and_street = numer_and_street;
+      this.city = city;
+      this.postal_code = postal_code;
+      this.country = country;
+      this.interventions = interventions;
+
+    }
+  }
+
+const AddressInputType = new graphql.GraphQLInputObjectType({
+    name: 'AddressInput',
+    fields: {
+        id: { type: new graphql.GraphQLNonNull(graphql.GraphQLInt) },
+        type_of_address: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        numer_and_street: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        suite_and_appartment: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        city: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        postal_code: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        country: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        //interventions: { type: new graphql.GraphQLNonNull(graphql.GraphQLList(InterventionType)) },
+    }
+  });
+  
+  const AddressType = new graphql.GraphQLObjectType({
+    name: 'Address',
+    fields: {
+        id: { type: new graphql.GraphQLNonNull(graphql.GraphQLInt) },
+        type_of_address: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        numer_and_street: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        suite_and_appartment: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        city: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        postal_code: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        country: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+    }
+  });
+
+  // Customers - >
+
+  class Customer {
+    constructor( type_of_address, numer_and_street, city, postal_code, country, interventions) {
+      this.type_of_address = type_of_address;
+      this.numer_and_street = numer_and_street;
+      this.city = city;
+      this.postal_code = postal_code;
+      this.country = country;
+      this.interventions = interventions;
+
+    }
+  }
+
+const CustomerInputType = new graphql.GraphQLInputObjectType({
+    name: 'CustomerInput',
+    fields: {
+        id: { type: new graphql.GraphQLNonNull(graphql.GraphQLInt) },
+        type_of_address: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        numer_and_street: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        suite_and_appartment: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        city: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        postal_code: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        country: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        //interventions: { type: new graphql.GraphQLNonNull(graphql.GraphQLList(InterventionType)) },
+    }
+  });
+  
+  const CustomerType = new graphql.GraphQLObjectType({
+    name: 'Customer',
+    fields: {
+        id: { type: new graphql.GraphQLNonNull(graphql.GraphQLInt) },
+        type_of_address: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        numer_and_street: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        suite_and_appartment: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        city: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        postal_code: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+        country: { type: new graphql.GraphQLNonNull(graphql.GraphQLString) },
+    }
+  });
+
+
+  let address = new Address(1, "Appartment", "2332 bellevue", "apt. 256", "montreal", "2k4 3k5", "canada" );
+
+  const mutationType = new graphql.GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      createAddress: {
+        type: AddressType,
+        args: {
+          address: {
+            type: new graphql.GraphQLNonNull(AddressInputType),
+          },
+        },
+        resolve: (_, { address: { type_of_address, numer_and_street, suite_and_appartment, city, postal_code,country } }) => {
+          address = new Address(type_of_address, numer_and_street, suite_and_appartment, city, postal_code,country);
+          return address;
         }
-    })
-})
+      }
+    }
+  });
 
-const schema = new GraphQLSchema({
-    query: RootQueryType,
-    mutation: RootMutationType
-})
+  
+  const queryType = new graphql.GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      address: {
+        type: AddressType,
+        args: {
+            id: { type: graphql.GraphQLInt}
+        },
+        resolve: (parent, args) => address.find(address => address.id === args.id)
+      }
+    }
+  });
+
+// let queryType = function( sql, values ) {
+//     return new Promise(( resolve, reject ) => {
+//         con.getConnection(function(err, con) {
+//             if (err) {
+//                 resolve( err )
+//             } else {
+//                 con.query(sql, values, ( err, rows) => {
+//                     con.release()
+//                     if ( err ) {
+//                         reject( err )
+//                     } else {
+//                         resolve( rows )
+//                     }
+//                 })
+//             }
+//         })
+//     })
+// }
+
+
+const schema = new graphql.GraphQLSchema({ query: queryType, mutation: mutationType });
 
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: true
 }))
 app.listen('3000', () => console.log("Server is running"))
-
-
-// javascript error codes
-const schemaCodes = {
-  "25007": "schema_and_data_statement_mixing_not_supported",
-  "3F000": "invalid_schema_name",
-  "42P06": "duplicate_schema",
-  "42P15": "invalid_schema_definition",
-  "42000": "syntax_error_or_access_rule_violation",
-  "42601": "syntax_error"
-};
