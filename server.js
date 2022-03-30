@@ -1,3 +1,4 @@
+require('./connections.js')
 const express = require('express')
 const app = express()
 const { graphqlHTTP } = require("express-graphql");
@@ -11,32 +12,29 @@ const {
 } = require('graphql')
 
 // OBJECTS
-const BatteryType = new GraphQLObjectType({
-    name: "Battery",
-    description: "Battery",
+const AddressType = new GraphQLObjectType({
+    name: "Address",
+    description: "Address of the buidling",
     fields: () => ({
         id: { type: GraphQLNonNull(GraphQLInt) },
-        status: { type: GraphQLNonNull(GraphQLString) },
-        columns: { 
-            type: new GraphQLList(ColumnType),
-            resolve: (battery) => {
-                return columns.filter(column => battery.columnID === column.ID)
-            }
-        }
+        type_of_address: { type: GraphQLNonNull(GraphQLString) },
+        status: { type: GraphQLString},
+        entity: { type: GraphQLString},
+        numer_and_street: { type: GraphQLNonNull(GraphQLString) },
+        suite_and_appartment: { type: GraphQLString},
+        city: { type: GraphQLNonNull(GraphQLString) },
+        postal_code: { type: GraphQLString },
+        country: {type: GraphQLNonNull(GraphQLString) },
+        notes: { type: GraphQLString }
     })
 })
-const ColumnType = new GraphQLObjectType({
-    name: "Column",
-    description: "Column",
+const Buidling = new GraphQLObjectType({
+    name: "Building",
+    description: "Get building infos",
     fields: () => ({
         id: { type: GraphQLNonNull(GraphQLInt) },
-        status: { type: GraphQLNonNull(GraphQLString) },
-        elevators: { 
-            type: new GraphQLList(ElevatorType),
-            resolve: (column) => {
-                return elevators.filter(elevator => column.elevatorID === elevator.ID)
-            }
-        }
+        address: { type: [AddressType] },
+        
     })
 })
 
@@ -57,17 +55,17 @@ const RootQueryType = new GraphQLObjectType({
     description: "Root Query",
     // function so we can define everything before we run it
     fields: () => ({
-        battery: {
-            type: BatteryType,
-            description: "Specific battery",
+        address: {
+            type: AddressType,
+            description: "Specifi address",
             args: {
                 id: { type: GraphQLInt },
-                status: { type: GraphQLString }
+                city: { type: GraphQLString }
             },
             resolve: (parent, args) => batteries.find(battery => battery.id === args.id)
         },
         column: {
-            type: ColumnType,
+            type: AddressType,
             description: "Specific column",
             args: {
                 id: { type: GraphQLInt }
@@ -82,18 +80,25 @@ const RootQueryType = new GraphQLObjectType({
             },
             resolve: (parent, args) => elevators.find(elevator => elevator.id === args.id)
         },
-        batteries: {
-            type: new GraphQLList(BatteryType),
+        addresses: {
+            type: new GraphQLList(AddressType),
             description: "All available batteries",
-            resolve: () => batteries
+            resolve: () =>  {
+                con.query("Select * from addresses", function (err, result, fields) {
+                    if (err) throw err;
+                    console.log(result);
+                    console.log("Get all addresses")
+                  });
+                return result
+            }
         },
         columns: {
-            type: new GraphQLList(BatteryType),
+            type: new GraphQLList(AddressType),
             description: "All available columns",
             resolve: () => columns
         },
         elevators: {
-            type: new GraphQLList(BatteryType),
+            type: new GraphQLList(AddressType),
             description: "All available elevators",
             resolve: () => batteries
         },
@@ -103,13 +108,12 @@ const RootQueryType = new GraphQLObjectType({
 // mutation to be able to modify the objects
 
 const RootMutationType = new GraphQLObjectType({
-    name: "Mutation",
+    name: "Mutations",
     description: "Change objects",
     fields: () => ({
-        changeStatusColumn: {
-            type: ColumnType,
+        changeStatusAddress: {
+            type: AddressType,
             description: "modify Column Status",
-            args
         }
     })
 })
@@ -123,4 +127,15 @@ app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: true
 }))
-app.listen('5000', () => console.log("Server is running"))
+app.listen('3000', () => console.log("Server is running"))
+
+
+// javascript error codes
+const schemaCodes = {
+  "25007": "schema_and_data_statement_mixing_not_supported",
+  "3F000": "invalid_schema_name",
+  "42P06": "duplicate_schema",
+  "42P15": "invalid_schema_definition",
+  "42000": "syntax_error_or_access_rule_violation",
+  "42601": "syntax_error"
+};
