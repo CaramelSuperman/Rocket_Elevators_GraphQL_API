@@ -21,12 +21,12 @@ con.connect(function(err) {
     if (err) throw err;
     con.query("Show tables", function (err, result, fields) {
       if (err) throw err;
-      console.log(result);
+    //   console.log(result);
     console.log("we are connected to mysql")
     });
     con.query("Select * from addresses", function (err, result, fields) {
       if (err) throw err;
-      console.log(result);
+    //   console.log(result);
       console.log("Addresses table")
     });
   });   
