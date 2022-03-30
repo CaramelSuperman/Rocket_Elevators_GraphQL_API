@@ -1,4 +1,37 @@
-require('./connections.js')
+var mysql = require('mysql')
+// const Pool = require("pg").Pool;
+// const pool = new Pool({
+//     user: "root",
+//     host: "root",
+//     database: "Rocket_Elevator_Information_System_development",
+//     password: "Rolens123@",
+//     port: "5432"
+//   });
+// const schema = "myschema";
+// var pgSchemas = [];
+
+var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "Rolens123@",
+    database: "Rocket_Elevator_Information_System_development"
+});
+
+con.connect(function(err) {
+    if (err) throw err;
+    con.query("Show tables", function (err, result, fields) {
+      if (err) throw err;
+    //   console.log(result);
+    console.log("we are connected to mysql")
+    });
+    con.query("Select * from customers", function (err, result, fields) {
+      if (err) throw err;
+    //   console.log(result);
+    //   console.log("Addresses table")
+    });
+  });   
+
+
 const express = require('express')
 const app = express()
 const { graphqlHTTP } = require("express-graphql");
@@ -25,25 +58,35 @@ const AddressType = new GraphQLObjectType({
         city: { type: GraphQLNonNull(GraphQLString) },
         postal_code: { type: GraphQLString },
         country: {type: GraphQLNonNull(GraphQLString) },
-        notes: { type: GraphQLString }
+        notes: { type: GraphQLString },
+        interventions: { type: GraphQLList(InterventionType) }
     })
 })
-const Buidling = new GraphQLObjectType({
-    name: "Building",
-    description: "Get building infos",
+const CustomerType = new GraphQLObjectType({
+    name: "Customer",
+    description: "Get customers infos",
     fields: () => ({
         id: { type: GraphQLNonNull(GraphQLInt) },
         address: { type: [AddressType] },
+        company_name: { type: GraphQLNonNull(GraphQLString) },
+        email_company: { type: GraphQLNonNull(GraphQLString) },
+        company_description: { type: GraphQLString},
+        full_name_service_technical_authority: { type: GraphQLNonNull(GraphQLString) },
+        technical_authority_phone: { type: GraphQLNonNull(GraphQLInt) },
+        technical_authority_email: { type: GraphQLNonNull(GraphQLString) },
+        interventions: { type: GraphQLList(InterventionType) }
         
     })
 })
 
-const ElevatorType = new GraphQLObjectType({
-    name: "Elevator",
-    description: "Elevator",
+const InterventionType = new GraphQLObjectType({
+    name: "Intervention",
+    description: "Interventions date",
     fields: () => ({
         id: { type: GraphQLNonNull(GraphQLInt) },
-        status: { type: GraphQLNonNull(GraphQLString) }
+        date_start: { type: GraphQLNonNull(GraphQLString) },
+        date_end: { type: GraphQLNonNull(GraphQLString) },
+        notes: { type: GraphQLString }
     })
 })
 
@@ -57,50 +100,42 @@ const RootQueryType = new GraphQLObjectType({
     fields: () => ({
         address: {
             type: AddressType,
-            description: "Specifi address",
+            description: "Specific address",
             args: {
                 id: { type: GraphQLInt },
                 city: { type: GraphQLString }
             },
-            resolve: (parent, args) => batteries.find(battery => battery.id === args.id)
-        },
-        column: {
-            type: AddressType,
-            description: "Specific column",
-            args: {
-                id: { type: GraphQLInt }
-            },
-            resolve: (parent, args) => columns.find(column => column.id === args.id)
-        },
-        elevator: {
-            type: ElevatorType,
-            description: "Specific elevator",
-            args: {
-                id: { type: GraphQLInt }
-            },
-            resolve: (parent, args) => elevators.find(elevator => elevator.id === args.id)
+            resolve: (parent, args) => address.find(address => address.id === args.id)
         },
         addresses: {
             type: new GraphQLList(AddressType),
             description: "All available batteries",
             resolve: () =>  {
-                con.query("Select * from addresses", function (err, result, fields) {
+                var addresses = con.query("Select * from addresses", function (err, result, fields) {
                     if (err) throw err;
-                    console.log(result);
-                    console.log("Get all addresses")
+                    // console.log(result);
+                    // console.log("Get all addresses")
+                    return result
                   });
-                return result
+                  return 1
+                
             }
         },
-        columns: {
-            type: new GraphQLList(AddressType),
-            description: "All available columns",
-            resolve: () => columns
+        interventions: {
+            type: InterventionType,
+            description: "get intervetnions",
+            args: {
+                id: { type: GraphQLInt },
+            },
+            resolve: (parent, args) => interventions.find(intervention => intervention.id === args.id)
         },
-        elevators: {
-            type: new GraphQLList(AddressType),
-            description: "All available elevators",
-            resolve: () => batteries
+        interventions: {
+            type: InterventionType,
+            description: "get intervetnions",
+            args: {
+                id: { type: GraphQLInt },
+            },
+            resolve: (parent, args) => interventions.find(intervention => intervention.id === args.id)
         },
     })
 })

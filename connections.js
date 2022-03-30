@@ -24,10 +24,10 @@ con.connect(function(err) {
     //   console.log(result);
     console.log("we are connected to mysql")
     });
-    con.query("Select * from addresses", function (err, result, fields) {
+    con.query("Select * from customers", function (err, result, fields) {
       if (err) throw err;
     //   console.log(result);
-      console.log("Addresses table")
+    //   console.log("Addresses table")
     });
   });   
 
