@@ -1,0 +1,2 @@
+class FactIntervention < BasePostgresRecord
+end

@@ -1,0 +1,2 @@
+class Detailsbuilding < ApplicationRecord
+end
