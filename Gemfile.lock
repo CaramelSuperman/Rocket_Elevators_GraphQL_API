@@ -227,7 +227,7 @@ DEPENDENCIES
   capybara
   debug
   graphiql-rails
-  graphql
+  graphql (~> 2.0, >= 2.0.4)
   importmap-rails
   jbuilder
   mysql2

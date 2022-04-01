@@ -71,7 +71,7 @@ group :test do
   gem "webdrivers"
 end
 
-gem 'graphql'
+gem 'graphql', '~> 2.0', '>= 2.0.4'
 
 group :development do
   # A development utility to test GraphQL queries.
