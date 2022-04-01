@@ -56,6 +56,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem 'graphiql-rails'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
@@ -72,13 +73,5 @@ group :test do
 end
 
 gem 'graphql', '~> 2.0', '>= 2.0.4'
-
-group :development do
-  # A development utility to test GraphQL queries.
-  gem 'graphiql-rails'
-
-  # Seed data generator
-end
-
 gem "mysql2"
 gem "pg"
