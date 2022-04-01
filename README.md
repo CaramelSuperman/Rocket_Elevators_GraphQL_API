@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # README
 
 This README would normally document whatever steps are necessary to get the
@@ -22,3 +23,6 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+=======
+# -Rocket-Elevators-Graphql
+>>>>>>> edd05435c9f5e9d4d6cb3a99b69f05e6c7532a56
