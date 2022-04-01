@@ -1,0 +1,2 @@
+class InterventionFact < ApplicationRecord
+end
