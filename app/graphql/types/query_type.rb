@@ -37,7 +37,7 @@ module Types
     end
 
     field :interventions, [FactInterventionType], null: false,
-    description: "Return all the addresses"
+    description: "Return all the interventions"
     def interventions
       FactIntervention.all
     end
