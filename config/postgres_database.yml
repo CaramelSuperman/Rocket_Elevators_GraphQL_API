@@ -1,16 +1,16 @@
-default: &default
-  adapter: postgresql
-  encoding: unicode
-  pool: 5
-  host: localhost
-  username: rolens
-  password: Rolens123@
-development:
-  <<: *default
-  database: database_pg
-test:
-  <<: *default
-  database: database_pg
+# default: &default
+#   adapter: postgresql
+#   encoding: unicode
+#   pool: 5
+#   host: localhost
+#   username: rolens
+#   password: Rolens123@
+# development:
+#   <<: *default
+#   database: database_pg
+# test:
+#   <<: *default
+#   database: database_pg
 # default: &default
 #   adapter: postgresql
 #   encoding: unicode
@@ -25,3 +25,19 @@ test:
 #   <<: *default
 #   database: Postgres_Rocket_Elevators_Information_System_test
 #set up production?
+default: &default
+  adapter: postgresql
+  encoding: utf8
+  pool: 5
+  host:  codeboxx-postgresql.cq6zrczewpu2.us-east-1.rds.amazonaws.com
+  username: codeboxx
+  password: Codeboxx1!
+
+development:
+  <<: *default
+  database: EricGaudreault
+
+
+test:
+  <<: *default
+  database: Rocket_Elevators_Information_System_test
