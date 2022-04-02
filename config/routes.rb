@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   # get "/index" , to:"index"
   root "home#index"
-  if Rails.env.development? || Rails.env.production?
+  if Rails.env.development?
     mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
   end
   post "/graphql", to: "graphql#execute"
