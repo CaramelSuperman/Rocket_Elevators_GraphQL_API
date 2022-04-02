@@ -36,17 +36,33 @@ module Types
       Customer.find(id)
     end
 
+    # interventions
     field :interventions, [FactInterventionType], null: false,
     description: "Return all the interventions"
     def interventions
       FactIntervention.all
     end
     field :intervention, Types::FactInterventionType, null: false do
-      argument :employeeID, Integer
+      argument :employeeID, Integer, required: false
     end
 
-    def intervention(id:)
+    def intervention(employeeID:)
       FactIntervention.find(employeeID)
+      intervention = FactIntervention.find(employeeID)
+    end
+    
+    # Employees
+    field :employee, Types::EmployeeType, null: false do
+      argument :id, Integer, required: false
+    end
+    def employee(id:)
+      Employee.find(id)
+    end
+
+    field :employees, [EmployeeType], null: false,
+    description: "Return all the employees"
+    def employees
+      Employee.all
     end
   end
 end
