@@ -17,5 +17,10 @@ module Types
     field :state, String
     field :latitude, String
     field :longitude, String
+    field :interventions, [FactInterventionType], null: false
+
+    def interventions
+      FactIntervention.where(buildingID: object.id)
+    end
   end
 end
