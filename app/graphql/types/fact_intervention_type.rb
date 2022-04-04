@@ -15,5 +15,17 @@ module Types
     field :status, String
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
+    # field :adress, [AdressType], null: true
+    field :adress, [AdressType], null: false
+    field :buildingDetails, [DetailsbuildingType], null: true
+
+    def adress
+      Adress.where(id: object.buildingID)
+    end
+    def buildingDetails
+      Detailsbuilding.where(id: object.buildingID)
+    end
+
+
   end
 end
