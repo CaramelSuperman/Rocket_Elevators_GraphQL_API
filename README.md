@@ -25,7 +25,7 @@ postgres: set up to the codeboxx database server in amazong aws
 to tes we use postman to test our graphql
 here are some exemples
 
-https://web.postman.co/workspace/My-Workspace~8814341d-47c4-42f3-88c3-ed6be034bdbd/documentation/20281199-1c9ec8f3-06e5-465f-a4e0-4636be5c76f7
+https://documenter.getpostman.com/view/20281199/UVysxbdA
 
 * DEPLOYEMENT 
 to deploy this api uses heroku
